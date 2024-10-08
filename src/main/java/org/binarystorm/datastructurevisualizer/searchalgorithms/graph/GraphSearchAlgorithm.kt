@@ -1,15 +1,9 @@
 ﻿package org.binarystorm.datastructurevisualizer.searchalgorithms.graph
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.Blocks
-import org.binarystorm.datastructurevisualizer.searchalgorithms.EntranceBlock
-import org.binarystorm.datastructurevisualizer.searchalgorithms.MazeBlock
 
 abstract class GraphSearchAlgorithm(private val delay: Long = 50L) {
     fun findPath(world: ServerLevel, start: BlockPos) {
@@ -35,8 +29,8 @@ abstract class GraphSearchAlgorithm(private val delay: Long = 50L) {
 
     }
 
-    fun buildGraph(world: ServerLevel, start: BlockPos): ArrayList<ArrayList<MazeBlock>> {
-        if (world.getBlockState(start) != EntranceBlock.Companion.BLOCK_STATE) {
+    fun buildGraph(world: ServerLevel, start: BlockPos): ArrayList<ArrayList<GraphBlock>> {
+        if (world.getBlockState(start) != GraphEntranceBlock.Companion.BLOCK_STATE) {
             world.players().forEach { player ->
                 player.sendSystemMessage(Component.literal("Entrance block is not valid"))
             }
@@ -47,5 +41,5 @@ abstract class GraphSearchAlgorithm(private val delay: Long = 50L) {
         return graphLayout
     }
 
-    abstract fun searchGraph(world: ServerLevel, start: BlockPos): ArrayList<ArrayList<MazeBlock>>
+    abstract fun searchGraph(world: ServerLevel, start: BlockPos): ArrayList<ArrayList<GraphBlock>>
 }
