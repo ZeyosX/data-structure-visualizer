@@ -32,7 +32,6 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.binarystorm.datastructurevisualizer.commands.GenerateCommand;
 import org.binarystorm.datastructurevisualizer.commands.PathCommand;
-import org.binarystorm.datastructurevisualizer.generators.MazeGenerator;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file

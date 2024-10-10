@@ -1,0 +1,7 @@
+﻿### ForgeGradle template
+# Minecraft client/server files
+run/
+/build/
+/.gradle/
+/.kotlin/
+/.idea/
