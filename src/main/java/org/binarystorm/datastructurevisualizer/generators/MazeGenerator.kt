@@ -6,60 +6,71 @@ import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import java.util.Random
 
-class MazeGenerator(private val size: Int) {
+class MazeGenerator(size: Int, world: ServerLevel, startPos: BlockPos) : Generator(size, world, startPos) {
     private val wallBlock: BlockState = Blocks.WHITE_CONCRETE.defaultBlockState()
     private val pathBlock: BlockState = Blocks.YELLOW_CONCRETE.defaultBlockState()
     private val entranceBlock: BlockState = Blocks.BLACK_CONCRETE.defaultBlockState()
     private val exitBlock: BlockState = Blocks.BLUE_CONCRETE.defaultBlockState()
 
     private val random = Random()
-    private var entrancePos: BlockPos? = null
-    private var exitPos: BlockPos? = null
 
-    fun generateMaze(world: ServerLevel, startPos: BlockPos) {
-        val maze = Array<BooleanArray?>(size) { BooleanArray(size) }
-        carvePassage(1, 1, maze)
+    override fun doGenerate(world: ServerLevel, startPos: BlockPos): ArrayList<ArrayList<Pair<BlockPos, BlockState>>> {
+        val maze = Array(size) { BooleanArray(size) } // No need for nullable arrays
+        carvePath(1, 1, maze)
 
-        entrancePos = getRandomBorderPosition(startPos)
+        val generatedBlocks = ArrayList<ArrayList<Pair<BlockPos, BlockState>>>()
+
+        var entrancePos = getRandomBorderPosition(startPos)
+        var exitPos: BlockPos
         do {
             exitPos = getRandomBorderPosition(startPos)
         } while (entrancePos == exitPos)
 
         for (x in 0 until size) {
+            val rowBlocks = ArrayList<Pair<BlockPos, BlockState>>()
             for (z in 0 until size) {
                 val blockPos = startPos.offset(x, 0, z)
-                if (blockPos == entrancePos) {
-                    world.setBlockAndUpdate(blockPos, entranceBlock)
-                } else if (blockPos == exitPos) {
-                    world.setBlockAndUpdate(blockPos, exitBlock)
-                } else if (maze[x]!![z]) {
-                    world.setBlockAndUpdate(blockPos, pathBlock)
-                } else {
-                    world.setBlockAndUpdate(blockPos, wallBlock)
+                val newBlockState: BlockState = when {
+                    blockPos == entrancePos -> entranceBlock
+                    blockPos == exitPos -> exitBlock
+                    maze[x][z] -> pathBlock
+                    else -> wallBlock
                 }
+
+                val oldBlockState = world.getBlockState(blockPos)
+                rowBlocks.add(Pair(blockPos, oldBlockState))
+                world.setBlockAndUpdate(blockPos, newBlockState)
+
+            }
+            generatedBlocks.add(rowBlocks)
+        }
+
+        return generatedBlocks
+    }
+
+
+    private fun carvePath(x: Int, z: Int, maze: Array<BooleanArray>) {
+        maze[x][z] = true
+        val directions = intArrayOf(0, 1, 2, 3)
+        shuffleArray(directions)
+
+        for (dir in directions) {
+            var newX = x
+            var newZ = z
+            when (dir) {
+                0 -> newX += 2
+                1 -> newZ += 2
+                2 -> newX -= 2
+                3 -> newZ -= 2
+            }
+
+            if (newX > 0 && newX < size && newZ > 0 && newZ < size && !maze[newX][newZ]) {
+                maze[x + (newX - x) / 2][z + (newZ - z) / 2] = true
+                carvePath(newX, newZ, maze)
             }
         }
     }
 
-    private fun carvePassage(x: Int, z: Int, maze: Array<BooleanArray?>) {
-        maze[x]!![z] = true
-        val dirs = intArrayOf(0, 1, 2, 3)
-        shuffleArray(dirs)
-
-        for (dir in dirs) {
-            var nx = x
-            var nz = z
-            if (dir == 0) nx += 2
-            if (dir == 1) nz += 2
-            if (dir == 2) nx -= 2
-            if (dir == 3) nz -= 2
-
-            if (nx > 0 && nx < size && nz > 0 && nz < size && !maze[nx]!![nz]) {
-                maze[x + (nx - x) / 2]!![z + (nz - z) / 2] = true
-                carvePassage(nx, nz, maze)
-            }
-        }
-    }
 
     private fun shuffleArray(array: IntArray) {
         for (i in array.size - 1 downTo 1) {
@@ -71,7 +82,7 @@ class MazeGenerator(private val size: Int) {
     }
 
     private fun getRandomBorderPosition(startPos: BlockPos): BlockPos {
-        val side = random.nextInt(4) // Select one of the four sides
+        val side = random.nextInt(4)
         var pos: Int
 
         when (side) {
