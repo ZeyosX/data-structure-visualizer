@@ -15,7 +15,7 @@ class MazeGenerator(size: Int, world: ServerLevel, startPos: BlockPos) : Generat
     private val random = Random()
 
     override fun doGenerate(world: ServerLevel, startPos: BlockPos): ArrayList<ArrayList<Pair<BlockPos, BlockState>>> {
-        val maze = Array(size) { BooleanArray(size) } // No need for nullable arrays
+        val maze = Array(size) { BooleanArray(size) }
         carvePath(1, 1, maze)
 
         val generatedBlocks = ArrayList<ArrayList<Pair<BlockPos, BlockState>>>()

@@ -1,8 +1,5 @@
 ﻿package org.binarystorm.datastructurevisualizer.generators
 
-import com.mojang.brigadier.context.CommandContext
-import net.minecraft.client.Minecraft
-import net.minecraft.commands.CommandSourceStack
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState
@@ -22,7 +19,6 @@ abstract class Generator(val size: Int, val world: ServerLevel, val startPos: Bl
     }
 
     abstract fun doGenerate(world: ServerLevel, startPos: BlockPos): ArrayList<ArrayList<Pair<BlockPos, BlockState>>>
-
 
     companion object {
         private val history = Stack<List<Pair<BlockPos, BlockState>>>()
